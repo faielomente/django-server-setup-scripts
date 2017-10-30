@@ -1,9 +1,8 @@
 # django-server-setup-scripts
+====================
 This repository contains ansible roles that initially setup a django project in a server.
 
-ansible-django-stack
-====================
-
+### ansible-django-stack
 Ansible Playbook designed for environments running a Django app.  It can install and configure these applications that are commonly used in production Django deployments:
 
 - Nginx
@@ -14,7 +13,7 @@ Ansible Playbook designed for environments running a Django app.  It can install
 
 This assumes that you have already installed nginx in your local machine. If you haven't, follow their installation guide [here](https://www.nginx.com/resources/admin-guide/installing-nginx-open-source/) 
 
-### Instructions
+##### Instructions
 1. A copy of the project's repository
 2.  Edit the variables files located in the `host_vars/variables.yml`:
 **Note:**
