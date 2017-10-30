@@ -1,0 +1,11 @@
+---
+
+- name: Starting the play.
+  hosts: < server's ip address >
+  remote_user: < name of the user in the remote server >
+  vars_files:
+    - host_vars/variables.yml
+
+  roles:
+    - < role >
+    - < role >
