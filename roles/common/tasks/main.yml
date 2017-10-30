@@ -1,0 +1,88 @@
+---
+
+- name: Include variable files
+  include_vars:
+    file: vars/user_vars.yml
+
+- name: Create a New user
+  user: 
+    name: "{{ user_name }}"
+    group: sudo
+    shell: /bin/bash
+
+- name: Enable password-less sudo
+  lineinfile:
+    path: /etc/sudoers
+    state: present
+    regexp: '^%sudo ALL\='
+    line: '%sudo ALL=(ALL) NOPASSWD:ALL'
+
+- name: Create a folder for SSH keys and set it's permissions
+  file:
+    path: /home/{{ user_name }}/.ssh/
+    owner: "{{ user_name }}"
+    group: sudo
+    state: directory
+    mode: 0700
+
+- name: Add public SSH-key in the local machine to remote machine
+  authorized_key:
+    user: "{{ user_name }}"
+    key: "{{ item.key }}"
+    state: present
+    path: /home/{{ user_name }}/.ssh/authorized_keys
+    manage_dir: no
+  with_items:
+    - "{{ ssh_user }}"
+
+- name: Change permissions of the '/opt/' directory
+  file:
+    path: /opt/
+    state: directory
+    owner: "{{ user_name }}"
+    group: sudo
+    mode: 0775
+
+- name: Create postgres backup directory
+  file:
+    path: /opt/postgres_backups/
+    owner: "{{ user_name }}"
+    group: sudo
+    state: directory
+    mode: 0760
+
+- name: Disable password authentication via ssh
+  lineinfile: 
+    path: /etc/ssh/sshd_config
+    regexp: "^#?PasswordAuthentication"
+    state: present
+    line: "PasswordAuthentication no"
+  notify: reload sshd
+
+- name: Disable logging in as a root user
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^PermitRootLogin"
+    line: "PermitRootLogin no"
+    state: present
+
+- name: Reload sshd
+  command: systemctl reload sshd
+  notify: reload sshd
+
+- name: Firewall - close all ports
+  ufw:
+    state: enabled
+    policy: deny
+
+- name: Firewall - open ssh ports
+  ufw:
+    rule: allow
+    port: 22
+    proto: tcp
+
+- name: Firewall - open http port
+  ufw:
+    rule: allow
+    port: 80
+    proto: tcp

@@ -1,0 +1,36 @@
+---
+
+- name: Create the Nginx configuration file
+  become: yes
+  become_method: sudo
+  template:
+    src: "{{ nginx_config_template }}"
+    dest: /etc/nginx/sites-available/{{ file_priority }}_{{ project_name }}
+    backup: yes
+  notify: reload nginx
+
+- name: Disable nginx default site
+  become: yes
+  become_method: sudo  
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: reload nginx
+
+- name: Create a link of the site to sites-enabled dir
+  become: yes
+  become_method: sudo
+  file:
+    src: /etc/nginx/sites-available/{{ file_priority }}_{{ project_name }}
+    dest: /etc/nginx/sites-enabled/{{ file_priority }}_{{ project_name }}
+    state: link
+    force: yes
+  notify: reload nginx
+
+- name: Ensure Nginx service is started
+  become: yes
+  become_method: sudo  
+  service:
+    name: nginx
+    state: started
+    enabled: yes

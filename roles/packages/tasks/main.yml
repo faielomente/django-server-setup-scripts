@@ -1,0 +1,27 @@
+---
+
+- name: Update and install pip3, Postgresql, Nginx, Supervisor and dev files for Gunicorn 
+  apt:
+    name: "{{ item }}"
+    update_cache: yes
+    state: latest
+  with_items:
+    - "python3-pip"
+    - "python3-dev"
+    - "libpq-dev"
+    - "postgresql"
+    - "postgresql-contrib"
+    - "python3-psycopg2"
+    - "supervisor"
+    - "nginx"
+
+- name: Ensure bash, OpenSSl, and libssl are the latest versions
+  apt:
+    name: "{{ item }}"
+    update_cache: true
+    state: latest
+  with_items:
+    - bash
+    - openssl
+    - libssl-dev
+    - libssl-doc

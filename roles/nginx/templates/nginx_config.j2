@@ -1,0 +1,25 @@
+upstream django {
+    server unix:/tmp/{{ project_name }}.sock;
+}
+
+server {
+    listen 80;
+    server_name {{ server_address }};
+
+    error_log /var/log/nginx/error.log debug;
+
+    location /static/ {
+            root /opt/{{ project_name }};
+            index index.html;
+    }
+
+    location /media/ {
+            root /opt/{{ project_name }};
+    }
+
+    location / {
+            include proxy_params;
+            proxy_pass http://django;
+    }
+
+}

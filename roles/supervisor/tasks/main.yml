@@ -1,0 +1,26 @@
+---
+
+- name: Create the Supervisor config file
+  become: yes
+  become_method: sudo
+  template:
+    src: "{{ supervisor_config_template }}"
+    dest: /etc/supervisor/conf.d/{{ file_priority }}_{{ project_name }}.conf
+    owner: root
+    group: root
+    mode: 0644
+    force: yes
+
+- name: Re-read the Supervisor config files
+  become: yes
+  become_method: sudo
+  supervisorctl: 
+    name: "{{ project_name }}"
+    state: present
+
+- name: Restart Supervisor
+  become: yes
+  become_method: sudo
+  supervisorctl:
+    name: "{{ project_name }}"
+    state: restarted

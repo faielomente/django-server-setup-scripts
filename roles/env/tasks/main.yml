@@ -1,0 +1,60 @@
+---
+
+- name: Install virtualenvwrapper for project environment
+  become: yes
+  become_method: sudo
+  pip:
+    name: virtualenvwrapper
+    state: latest
+
+- name: Edit .bashrc
+  lineinfile:
+    path: /home/{{ user_name }}/.bashrc
+    line: "{{ item }}"
+  with_items:
+      - "export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3"
+      - "export WORKON_HOME=$HOME/.virtualenvs"
+      - "source /usr/local/bin/virtualenvwrapper.sh"
+
+- name: Source .bashrc to update configuration
+  shell: . /home/{{ user_name }}/.bashrc
+  args:
+    executable: /bin/bash
+
+- name: Copying {{ project_name }} repository from gitlab
+  git:
+    repo: "{{ project_repo }}"
+    dest: /opt/{{ project_name }}/  
+    accept_hostkey: yes
+    clone: yes
+    update: yes
+
+- name: Create and install {{ project_name }} requirements in the virtual environment
+  pip:
+    requirements: /opt/{{ project_name }}/{{ requirements_file }}.txt
+    virtualenv: /home/{{ user_name }}/.virtualenvs/{{ virtualenv_name }}
+    virtualenv_python: /usr/bin/python3
+
+- name: Set environment variables in postactivate
+  template:
+    src: env_vars.j2
+    dest: /home/{{ user_name }}/.virtualenvs/{{ virtualenv_name }}/bin/postactivate
+    owner: "{{ user_name }}"
+    group: sudo
+    mode: 0740
+
+- name: Django migrate
+  django_manage:
+    command: migrate
+    app_path: /opt/{{ project_name }}
+    virtualenv: /home/{{ user_name }}/.virtualenvs/{{ virtualenv_name }}
+  environment:
+    "{{ django_environment }}"
+
+- name: Django collectstatic files
+  django_manage:
+    command: collectstatic
+    app_path: /opt/{{ project_name }}
+    virtualenv: /home/{{ user_name }}/.virtualenvs/{{ virtualenv_name }}
+  environment:
+    "{{ django_environment }}"
