@@ -1,0 +1,11 @@
+# [production]
+# {{ ip_address }}
+
+# [production:vars]
+# {{ host_variables }}
+
+[staging]
+128.199.143.242
+
+[staging:vars]
+ansible_python_interpreter=/usr/bin/python3
