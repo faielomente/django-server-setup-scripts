@@ -1,0 +1,50 @@
+---
+# This file contains all the variables used by all the roles.
+
+# PROJECT VARIABLES
+# These are the variables contains the project name, repo link and others
+# Below are the initial variables. These varies among different projects.
+project_repo: < repository_link >
+project_name: < name of the project root dir >
+file_priority: < for nginx or supervisor config file priority number >
+app_name: < the main application's name where the settings.py might be located >
+user_name: < name of the local user in the remote server that will manage the project >
+requirements_file: < the reqirements file >
+
+# NGINX VARIABLES
+# Name of the nginx configuration file template to be used
+nginx_config_template: nginx_config.j2
+server_address: < ip address of the server used>
+
+# SUPERVISOR VARIABLE
+# Name of the supervisor configuration file template to be used
+supervisor_config_template: supervisor_config.j2
+number_gunicorn_workers: 3
+
+###
+# SECRET VARIABLES
+# Environment variables use by the django project.
+# Below are the initial variables. These varies among different projects.
+secret_key: < the SECRET_KEY variable >
+debug: < the DEBUG variable >
+vault_postgresql_password: < passwoword used either for db or logins >
+
+# VIRTUAL ENVIRONMENT VARIABLES
+virtualenv_name: "{{ project_name }}"
+
+# DJANGO ENVIRONMENT VARIABLES
+# Below are the initial variables. These varies among different projects.
+django_allowed_host: < ALLOWED_HOST django variable >
+django_environment:
+  SECRET_KEY: "{{ secret_key }}"
+  DEBUG: "{{ debug | default('False') }}"
+  DATABASE_URL: "psql://{{ db_user }}:{{ db_password }}@{{ db_host }}:{{ db_port }}/{{ db_name }}"
+
+# DATABASE VARIABLES
+# Below are the initial variables. These varies among different projects.
+db_user: < name of the database user >
+db_name: "{{ app_name }}"
+db_password: "{{ vault_postgresql_password }}"
+db_host: < database host address >
+db_port: < port used by the database >
+
